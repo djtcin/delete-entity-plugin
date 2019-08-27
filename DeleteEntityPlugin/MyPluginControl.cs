@@ -11,6 +11,7 @@ using XrmToolBox.Extensibility;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk;
 using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 
 namespace DeleteEntityPlugin
 {
@@ -25,6 +26,8 @@ namespace DeleteEntityPlugin
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
+            ExecuteMethod(WhoAmI);
+
             ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
 
             // Loads or creates the settings for the plugin
@@ -38,6 +41,11 @@ namespace DeleteEntityPlugin
             {
                 LogInfo("Settings found and loaded");
             }
+        }
+
+        private void WhoAmI()
+        {
+            Service.Execute(new WhoAmIRequest());
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
