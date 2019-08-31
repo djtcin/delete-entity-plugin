@@ -3,6 +3,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Users\denij\source\repos\DeleteEntityPlugin\DeleteEntityPlugin\bin\Debug\XrmToolBox.exe</StartProgram>
-    <StartArguments>/overridepath:. /plugin:"Delete entity"</StartArguments>
+    <StartArguments>/overridepath:. /plugin:"Delete entity" /connection:"OnlineAmfTrial"</StartArguments>
   </PropertyGroup>
 </Project>
