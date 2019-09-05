@@ -39,13 +39,12 @@
             this.btnNext = new System.Windows.Forms.Button();
             this.boxDependencies = new System.Windows.Forms.GroupBox();
             this.panelDependencies = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.labelAttributes = new System.Windows.Forms.Label();
+            this.cmbAttributes = new System.Windows.Forms.ComboBox();
+            this.btnExecute = new System.Windows.Forms.Button();
             this.toolStripMenu.SuspendLayout();
             this.boxDependencies.SuspendLayout();
-            this.panelDependencies.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -80,11 +79,12 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbEntities.Enabled = false;
             this.cmbEntities.FormattingEnabled = true;
-            this.cmbEntities.Location = new System.Drawing.Point(70, 32);
+            this.cmbEntities.Location = new System.Drawing.Point(80, 32);
             this.cmbEntities.Name = "cmbEntities";
-            this.cmbEntities.Size = new System.Drawing.Size(651, 24);
+            this.cmbEntities.Size = new System.Drawing.Size(641, 24);
             this.cmbEntities.TabIndex = 1;
             this.cmbEntities.SelectedIndexChanged += new System.EventHandler(this.cmbEntities_SelectedIndexChanged);
+            this.cmbEntities.TextUpdate += new System.EventHandler(this.cmbEntities_TextUpdate);
             // 
             // labelEntity
             // 
@@ -110,32 +110,32 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbActions.Enabled = false;
             this.cmbActions.FormattingEnabled = true;
-            this.cmbActions.Location = new System.Drawing.Point(70, 62);
+            this.cmbActions.Location = new System.Drawing.Point(80, 62);
             this.cmbActions.Name = "cmbActions";
-            this.cmbActions.Size = new System.Drawing.Size(570, 24);
+            this.cmbActions.Size = new System.Drawing.Size(641, 24);
             this.cmbActions.TabIndex = 6;
             this.cmbActions.SelectedIndexChanged += new System.EventHandler(this.cmbActions_SelectedIndexChanged);
             // 
             // btnNext
             // 
-            this.btnNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnNext.Enabled = false;
-            this.btnNext.Location = new System.Drawing.Point(646, 62);
+            this.btnNext.Location = new System.Drawing.Point(16, 122);
             this.btnNext.Name = "btnNext";
-            this.btnNext.Size = new System.Drawing.Size(75, 24);
+            this.btnNext.Size = new System.Drawing.Size(184, 24);
             this.btnNext.TabIndex = 7;
-            this.btnNext.Text = "Next";
+            this.btnNext.Text = "Search for dependencies";
             this.btnNext.UseVisualStyleBackColor = true;
             this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
             // 
             // boxDependencies
             // 
-            this.boxDependencies.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.boxDependencies.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.boxDependencies.Controls.Add(this.panelDependencies);
-            this.boxDependencies.Location = new System.Drawing.Point(16, 102);
+            this.boxDependencies.Location = new System.Drawing.Point(16, 152);
             this.boxDependencies.Name = "boxDependencies";
-            this.boxDependencies.Size = new System.Drawing.Size(705, 105);
+            this.boxDependencies.Size = new System.Drawing.Size(705, 70);
             this.boxDependencies.TabIndex = 9;
             this.boxDependencies.TabStop = false;
             this.boxDependencies.Text = "Dependencies";
@@ -146,49 +146,61 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelDependencies.AutoScroll = true;
-            this.panelDependencies.Controls.Add(this.textBox2);
-            this.panelDependencies.Controls.Add(this.label2);
-            this.panelDependencies.Controls.Add(this.textBox1);
-            this.panelDependencies.Controls.Add(this.label1);
             this.panelDependencies.Location = new System.Drawing.Point(6, 21);
             this.panelDependencies.Name = "panelDependencies";
-            this.panelDependencies.Size = new System.Drawing.Size(693, 78);
+            this.panelDependencies.Size = new System.Drawing.Size(693, 43);
             this.panelDependencies.TabIndex = 0;
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(3, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(241, 23);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "label1";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(268, 6);
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(16, 228);
+            this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(291, 22);
-            this.textBox1.TabIndex = 1;
+            this.textBox1.Size = new System.Drawing.Size(705, 129);
+            this.textBox1.TabIndex = 10;
             // 
-            // label2
+            // labelAttributes
             // 
-            this.label2.Location = new System.Drawing.Point(3, 42);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(241, 23);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "label2";
+            this.labelAttributes.AutoSize = true;
+            this.labelAttributes.Enabled = false;
+            this.labelAttributes.Location = new System.Drawing.Point(13, 95);
+            this.labelAttributes.Name = "labelAttributes";
+            this.labelAttributes.Size = new System.Drawing.Size(61, 17);
+            this.labelAttributes.TabIndex = 11;
+            this.labelAttributes.Text = "Atribute:";
             // 
-            // textBox2
+            // cmbAttributes
             // 
-            this.textBox2.Location = new System.Drawing.Point(268, 39);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(291, 22);
-            this.textBox2.TabIndex = 3;
+            this.cmbAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbAttributes.Enabled = false;
+            this.cmbAttributes.FormattingEnabled = true;
+            this.cmbAttributes.Location = new System.Drawing.Point(80, 92);
+            this.cmbAttributes.Name = "cmbAttributes";
+            this.cmbAttributes.Size = new System.Drawing.Size(641, 24);
+            this.cmbAttributes.TabIndex = 12;
+            // 
+            // btnExecute
+            // 
+            this.btnExecute.Enabled = false;
+            this.btnExecute.Location = new System.Drawing.Point(206, 122);
+            this.btnExecute.Name = "btnExecute";
+            this.btnExecute.Size = new System.Drawing.Size(164, 24);
+            this.btnExecute.TabIndex = 13;
+            this.btnExecute.Text = "Execute";
+            this.btnExecute.UseVisualStyleBackColor = true;
+            this.btnExecute.Click += new System.EventHandler(this.BtnExecute_Click);
             // 
             // MyPluginControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnExecute);
+            this.Controls.Add(this.cmbAttributes);
+            this.Controls.Add(this.labelAttributes);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.boxDependencies);
             this.Controls.Add(this.btnNext);
             this.Controls.Add(this.cmbActions);
@@ -203,8 +215,6 @@
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
             this.boxDependencies.ResumeLayout(false);
-            this.panelDependencies.ResumeLayout(false);
-            this.panelDependencies.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -222,8 +232,8 @@
         private System.Windows.Forms.GroupBox boxDependencies;
         private System.Windows.Forms.Panel panelDependencies;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelAttributes;
+        private System.Windows.Forms.ComboBox cmbAttributes;
+        private System.Windows.Forms.Button btnExecute;
     }
 }

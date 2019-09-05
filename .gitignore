@@ -1,3 +1,4 @@
 packages/
 DeleteEntityPlugin/bin/
 DeleteEntityPlugin/obj/
+.vs/

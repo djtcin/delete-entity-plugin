@@ -12,6 +12,7 @@ using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Discovery;
 using Microsoft.Crm.Sdk.Messages;
 using DeleteEntityPlugin.Common;
+using DeleteEntityPlugin.Entities;
 
 namespace DeleteEntityPlugin.Services
 {
