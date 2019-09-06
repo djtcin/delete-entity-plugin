@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xrm.Sdk.Query;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Crm.Sdk.Messages;
 
 namespace DeleteEntityPlugin.Services
 {
@@ -18,14 +21,6 @@ namespace DeleteEntityPlugin.Services
             this.Service = service;
         }
 
-        public bool IsObjectTypeSupported(Dependency.ComponentType objectType)
-        {
-            var supportedTypes = new Dependency.ComponentType[] { 
-                Dependency.ComponentType.SystemForm
-            };
-            return supportedTypes.Contains(objectType);
-        }
-
         public DependentEntity GetDependencyObject(Dependency dependency)
         {
             var objectId = dependency.DependentComponentObjectId.Value;
@@ -34,18 +29,40 @@ namespace DeleteEntityPlugin.Services
             {
                 case Dependency.ComponentType.SystemForm:
                     return SystemForm.GetEntity(this.Service, objectId);
+                case Dependency.ComponentType.EntityRelationship:
+                    return EntityRelationship.GetEntity(this.Service, objectId);
             }
 
             return null;
         }
 
-     /*   public void SolveDependency(DependentEntity dependentEntity)
+        public List<Dependency> GetDependencies(Guid objectId, Dependency.ComponentType objectType)
         {
-            switch (dependency.DependentComponentTypeValue)
+            RetrieveDependenciesForDeleteResponse response = (RetrieveDependenciesForDeleteResponse)Service.Execute(
+                new RetrieveDependenciesForDeleteRequest() {
+                    ObjectId = objectId,
+                    ComponentType = (int)objectType
+                }
+            );
+
+            List<Dependency> dependencies = response.EntityCollection.Entities.Select<Entity, Dependency>((entity) =>
             {
-                case Dependency.ComponentType.SystemForm:
-                    return SystemForm.ResolveDependency(this.Service, objectId);
-            }
-        }*/
+                var dependency = new Dependency(entity);
+                dependency.ObjectEntity = this.GetDependencyObject(dependency);
+                return dependency;
+            }).ToList();
+            List<Dependency> subDependencies = new List<Dependency>();
+
+            dependencies.ForEach(d => {
+                if (d.ObjectEntity?.HasSubdependencies == true)
+                {
+                    subDependencies.AddRange(this.GetDependencies(d.DependentComponentObjectId.Value, d.DependentComponentTypeValue));
+                }
+            });
+
+            dependencies.AddRange(subDependencies);
+
+            return dependencies;
+        }
     }
 }

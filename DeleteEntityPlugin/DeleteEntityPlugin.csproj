@@ -130,6 +130,7 @@
     <Compile Include="Common\ComboItem.cs" />
     <Compile Include="Entities\Dependency.cs" />
     <Compile Include="Entities\DependentEntity.cs" />
+    <Compile Include="Entities\EntityRelationship.cs" />
     <Compile Include="Entities\SystemForm.cs" />
     <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="MyPlugin.cs" />

@@ -151,8 +151,7 @@ namespace DeleteEntityPlugin
                 Message = "Looking for dependencies",
                 Work = (worker, args) =>
                 {
-                    List<Dependency> dependencies = this.EntityService.GetEntityDependencies(this.SelectedEntity);
-                    dependencies.ForEach((d) => d.ObjectEntity = DependencyService.GetDependencyObject(d));
+                    List<Dependency> dependencies = this.DependencyService.GetDependencies(this.SelectedEntity.MetadataId.Value, Dependency.ComponentType.Entity);
                     this.Dependencies = dependencies;
                     args.Result = dependencies;
                 },

@@ -53,17 +53,18 @@ namespace DeleteEntityPlugin.Helpers
         {
             var text = EnumHelper.GetEnumDescription((dependency.DependentComponentTypeValue));
             Label label = new Label();
-            label.AutoSize = false;
+            label.AutoSize = true;
             label.Location = new System.Drawing.Point(3, positionY);
             label.Name = "labelDependency" + index;
             label.Size = new System.Drawing.Size(241, 23);
             label.TabIndex = 0;
+            label.AutoEllipsis = true;
 
             if (dependency.ObjectEntity == null)
             {
                 label.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
                 text += " - Dependency not supported yet";
-                label.AutoSize = true;
+                
             } else
             {
                 text += " - " + dependency.ObjectEntity.Name;

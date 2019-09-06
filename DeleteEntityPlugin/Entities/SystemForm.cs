@@ -12,6 +12,14 @@ namespace DeleteEntityPlugin.Entities
 {
     class SystemForm : DependentEntity
     {
+        enum GridStatus
+        {
+            Free, ComponentCell, EmptyCell
+        }
+
+        public Entity Entity;
+        public string EntityLogicalName;
+
         public SystemForm(Entity entity)
         {
             this.EntityLogicalName = "systemform";
@@ -30,18 +38,29 @@ namespace DeleteEntityPlugin.Entities
             var xml = new XmlDocument();
             xml.LoadXml(this.Entity.GetAttributeValue<string>("formxml"));
             var sections = xml.SelectNodes("//section");
+            var footer = xml.SelectSingleNode("//footer");
+            var header = xml.SelectSingleNode("//header");
             var matchControlXPath = "control[contains(parameters/TargetEntityType, '" + entityLogicalName + "')]";
+            var languagecode = xml.SelectSingleNode("//label").Attributes["languagecode"].Value;
 
             for (int i = 0; i < sections.Count; i++)
             {
-                this.RemoveControlFromSection(sections.Item(i), matchControlXPath, xml);
+                this.RemoveControlFromContainer(sections.Item(i), matchControlXPath, xml, languagecode);
+            }
+            if (footer != null)
+            {
+                this.RemoveControlFromContainer(footer, matchControlXPath, xml, languagecode);
+            }
+            if (header != null)
+            {
+                this.RemoveControlFromContainer(header, matchControlXPath, xml, languagecode);
             }
 
             this.Entity.Attributes["formxml"] = xml.InnerXml;
             service.Update(this.Entity);
         }
 
-        private void RemoveControlFromSection(XmlNode section, string matchControlXPath, XmlDocument xmlDoc)
+        private void RemoveControlFromContainer(XmlNode section, string matchControlXPath, XmlDocument xmlDoc, string languagecode)
         {
             var columnsAttribute = section.Attributes["columns"];
             var columnsCount = columnsAttribute != null ? columnsAttribute.Value.Length : 1;
@@ -61,7 +80,7 @@ namespace DeleteEntityPlugin.Entities
                 {
                     this.RemoveCellFromGrid(grid, c);
                 } 
-                else
+                else if (!c.IsEmpty)
                 {
                     this.MoveCellUpOnGrid(grid, c);
                 }
@@ -70,25 +89,25 @@ namespace DeleteEntityPlugin.Entities
             cells.RemoveAll(c => c.ShouldBeDeleted);
 
             var rowsNode = section.SelectSingleNode("rows");
-            this.CreateNewRows(rowsNode, cells, grid, xmlDoc);
+            this.CreateNewRows(rowsNode, cells, grid, xmlDoc, languagecode);
         }
 
-        private void CreateNewRows(XmlNode rowsNode, List<Cell> cells, List<List<bool>> grid, XmlDocument xmlDoc)
+        private void CreateNewRows(XmlNode rowsNode, List<Cell> cells, List<List<GridStatus>> grid, XmlDocument xmlDoc, string languagecode)
         {
             rowsNode.RemoveAll();
 
             for (int i = 0; i < grid.Count; i++)
             {
-                if (grid[i].Any(g => g == true) || i == 0)
+                if (grid[i].Any(g => g == GridStatus.ComponentCell) || i == 0)
                 {
                     XmlNode row = xmlDoc.CreateElement("row");
                     rowsNode.AppendChild(row);
                     
                     for(int j = 0; j < grid[i].Count; j++)
                     {
-                        if (grid[i][j])
+                        if (grid[i][j] == GridStatus.ComponentCell)
                         {
-                            var cell = cells.Find(c => c.Row == i && c.Column == j);
+                            var cell = cells.Find(c => c.Row == i && c.Column == j && !c.IsEmpty);
                             if (cell != null)
                             {
                                 row.AppendChild(cell.Node);
@@ -96,7 +115,7 @@ namespace DeleteEntityPlugin.Entities
                         } 
                         else
                         {
-                            row.AppendChild(this.CreateEmptyCell(xmlDoc));
+                            row.AppendChild(this.CreateEmptyCell(xmlDoc, languagecode));
                         }
                     }
                 }
@@ -108,13 +127,12 @@ namespace DeleteEntityPlugin.Entities
 
         }
 
-        private XmlNode CreateEmptyCell(XmlDocument xmlDoc)
+        private XmlNode CreateEmptyCell(XmlDocument xmlDoc, string languagecode)
         {
             var cell = xmlDoc.CreateElement("cell");
             cell.SetAttribute("id", Guid.NewGuid().ToString());
             cell.SetAttribute("showlabel", "false");
-            cell.InnerXml = "<labels><label description =\"\"/></labels>";
-           // cell.InnerXml = "<labels><label description =\"\" languagecode=\"" + languagecode + "\"/></labels>";
+            cell.InnerXml = "<labels><label description =\"\" languagecode=\"" + languagecode + "\"/></labels>";
             return cell;
         }
 
@@ -129,13 +147,7 @@ namespace DeleteEntityPlugin.Entities
                 for (int j = 0; j < cellNodes.Count; j++)
                 {
                     var cellNode = cellNodes.Item(j);
-
-                    // TODO add empty space case
-                    if (cellNode.SelectSingleNode("control") == null)
-                    {
-                        continue;
-                    }
-
+                    var isEmpty = cellNode.SelectSingleNode("control") == null && cellNode.Attributes["userspacer"] == null;
                     var colSpanAttribute = cellNode.Attributes["colspan"];
                     var rowSpanAttribute = cellNode.Attributes["rowspan"];
                     var colSpan = colSpanAttribute != null ? Int32.Parse(colSpanAttribute.Value) : 1;
@@ -147,7 +159,8 @@ namespace DeleteEntityPlugin.Entities
                         Row = i,
                         ShouldBeDeleted = cellNode.SelectSingleNode(matchControlXPath) != null,
                         ColSpan = colSpan,
-                        RowSpan = rowSpan
+                        RowSpan = rowSpan,
+                        IsEmpty = isEmpty
                     });
                 }
             }
@@ -155,51 +168,51 @@ namespace DeleteEntityPlugin.Entities
             return cells;
         }
 
-        private List<List<bool>> GetGrid(List<Cell> cells, int rowsCount, int columnsCount)
+        private List<List<GridStatus>> GetGrid(List<Cell> cells, int rowsCount, int columnsCount)
         {
-            var grid = new List<List<bool>>();
+            var grid = new List<List<GridStatus>>();
             for(int i = 0; i < rowsCount; i++)
             {
-                grid.Add(new List<bool>());
+                grid.Add(new List<GridStatus>());
                 for (int j = 0; j < columnsCount; j++)
-                    grid[i].Add(false);
+                    grid[i].Add(GridStatus.Free);
             }
 
             cells.ForEach((cell) => {
-                cell.Column = grid[cell.Row].IndexOf(false);
+                cell.Column = grid[cell.Row].IndexOf(GridStatus.Free);
                 this.PlaceCellOnGrid(grid, cell);
             });
 
             return grid;
         }
 
-        private void PlaceCellOnGrid(List<List<bool>> grid, Cell cell)
+        private void PlaceCellOnGrid(List<List<GridStatus>> grid, Cell cell)
         {
             for(int i = cell.Row; i < cell.Row + cell.RowSpan; i++)
             {
                 for(int j = cell.Column; j < cell.Column + cell.ColSpan; j++)
                 {
-                    grid[i][j] = true;
+                    grid[i][j] = cell.IsEmpty ? GridStatus.EmptyCell : GridStatus.ComponentCell;
                 }
             }
         }
 
-        private void RemoveCellFromGrid(List<List<bool>> grid, Cell cell)
+        private void RemoveCellFromGrid(List<List<GridStatus>> grid, Cell cell)
         {
             for (int i = cell.Row; i < cell.Row + cell.RowSpan; i++)
             {
                 for (int j = cell.Column; j < cell.Column + cell.ColSpan; j++)
                 {
-                    grid[i][j] = false;
+                    grid[i][j] = GridStatus.Free;
                 }
             }
         }
 
-        private void MoveCellUpOnGrid(List<List<bool>> grid, Cell cell)
+        private void MoveCellUpOnGrid(List<List<GridStatus>> grid, Cell cell)
         {
             var newRow = cell.Row;
 
-            while (newRow-1 >= 0 && grid[newRow-1].Skip(cell.Column).Take(cell.ColSpan).All(c => c == false))
+            while (newRow-1 >= 0 && grid[newRow-1].Skip(cell.Column).Take(cell.ColSpan).All(c => c != GridStatus.ComponentCell))
             {
                 newRow -= 1;
             }
@@ -220,6 +233,7 @@ namespace DeleteEntityPlugin.Entities
             public bool ShouldBeDeleted;
             public int ColSpan;
             public int RowSpan;
+            public bool IsEmpty;
         }
     }
 }
